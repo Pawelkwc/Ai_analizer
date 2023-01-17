@@ -72,10 +72,7 @@ def check_parantices_b(structure):
                 num_of_branches+=1
                 count+=1
                 
-            if index >0 and structure[index-1] in ["="]:
-                lv_of_branches+=1
-            if index > 0 and structure[index-1] in ["#"]:
-                lv_of_branches+=2
+
         return num_of_branches, lv_of_branches
 
 

@@ -9,9 +9,9 @@ import functions_ai_konverter as aif
 
 
 
-string = "O1CCCCC1" 
+string = "CC(=O)C" 
 new_format = [["Atom",["Hyb","Rin","Amound"]]]
-
+add_hydrogen = True
 for index, atom in enumerate(string):
     parameters = []
     if atom in ["C","N","O","c"]:
@@ -95,7 +95,6 @@ for index, atom in enumerate(string):
              
              H_atoms = 2
              bond_level = 0
-             print(bond_level)
              H_atoms-=len(rings)
              
              
@@ -113,14 +112,6 @@ for index, atom in enumerate(string):
 
                  H_atoms-=1
              
-              
-                     
-                     
-
-
-
-         
-
         
 
           #add 0 if no rings for consistancy
@@ -133,7 +124,7 @@ for index, atom in enumerate(string):
           parameters.append(rings)
           parameters.append(1)
           new_format.append([atom, parameters])
-          if H_atoms != 0:   
+          if H_atoms != 0 and add_hydrogen == True:   
               new_format.append(["H",[1,[0],H_atoms]]) 
                
           
