@@ -9,9 +9,11 @@ import functions_ai_konverter as aif
 
 
 
-string = "CCOC" 
-new_format = [["Atom",["Hyb","Rin","Amound"]]]
-add_hydrogen = True
+string = "CC(=O)OC(=O)C" 
+string = "CC(C)(C)C(C)C"
+# new_format = [["Atom",["Hyb","Rin","Amound"]]]
+new_format = [["Atom",["Hyb","Rin","H:Num"]]]
+add_hydrogen = False
 for index, atom in enumerate(string):
     parameters = []
     if atom in ["C","N","O","c"]:
@@ -35,11 +37,12 @@ for index, atom in enumerate(string):
               H_atoms-=len(rings)
               #check for branches in order to calculate carbons and hybridization
               if index_f < len(string) and string[index_f] in ["(", "="]:
+                  
                   num_of_branches, lv_of_branches = aif.check_parantices_f(string[index_f::])     
                   bond_level += lv_of_branches
                   H_atoms -= (lv_of_branches+num_of_branches)
               
-              if index_b > 0 and string[index_b] in [")"]:
+              if index_b >= 0 and string[index_b] in [")"]:
                     num_of_branches, lv_of_branches = aif.check_parantices_b(string[::-1])     
                     H_atoms -= lv_of_branches
                     bond_level += lv_of_branches
@@ -52,14 +55,14 @@ for index, atom in enumerate(string):
                       i, rings = aif.check_if_ring_f(index_f+1, string, rings)
                     
                  
-              if index_b > 0 and string[index_b]=="=":
+              if index_b >= 0 and string[index_b]=="=":
                   bond_level+=1
                  
               # check for bonds for hybridization
               if index_f < len(string) and string[index_f]=="#":
                   bond_level+=2
                  
-              if index_b > 0 and string[index_b]=="#":
+              if index_b >= 0 and string[index_b]=="#":
                   bond_level+=2
                   
                   
@@ -96,13 +99,11 @@ for index, atom in enumerate(string):
              H_atoms = 2
              bond_level = 0
              H_atoms-=len(rings)
-             
-             
-             if index_b > 0 and string[index_b] in ["C","N","O", "(","="]:
-                 if string[index_b] in ["H","C","N","O"]:
-                     H_atoms-=1
 
-                 
+             if index_b >= 0 and string[index_b] in ["C","N","O", "(", ")","="]:
+                 if string[index_b] in ["H","C","N","O", "(", ")"]:
+                     H_atoms-=1
+                     
                  if string[index_b] in ["="]:
                      H_atoms-=2
                      bond_level+=1
@@ -111,6 +112,7 @@ for index, atom in enumerate(string):
              if index_f < len(string) and string[index_f] in ["H","C","N","O"]:
 
                  H_atoms-=1
+                 
              
         
 
@@ -120,19 +122,15 @@ for index, atom in enumerate(string):
         
              
            #create array of parameters    
-          parameters.append(bond_level+1)
-          parameters.append(rings)
-          parameters.append(1)
-          new_format.append([atom, parameters])
+          # parameters.append(bond_level+1)
+          # parameters.append(rings)
+          # parameters.append(1)
+          # parameters.append(f"H:{H_atoms}")
+          # new_format.append([atom, parameters])
           if H_atoms != 0 and add_hydrogen == True:   
-              new_format.append(["H",[1,[0],H_atoms]]) 
-               
-          
-
-             
- 
-             
-         
+              new_format.append(["H",[1,[0],H_atoms]])
+              
+          new_format.append([atom,f"H:{H_atoms}"])
             
           if atom in ["N","P"]:
              pass

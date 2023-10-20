@@ -42,7 +42,11 @@ def check_parantices_f(structure):
                 if index+1 < len(structure) and structure[index+1] in ["#"]:
                     lv_of_branches+=2
                     
-                    
+            if atom == ")" and structure[index+1] != "(":
+                break
+            
+            
+
             # if atom == ")" and count == 0:
 
             #     num_of_branches+=1
@@ -71,7 +75,10 @@ def check_parantices_b(structure):
             if atom == ")" and count == 0:
                 num_of_branches+=1
                 count+=1
+
+        
                 
+        
         return num_of_branches, lv_of_branches
 
 
