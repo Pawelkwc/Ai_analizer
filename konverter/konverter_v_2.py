@@ -10,13 +10,21 @@ import functions_ai_konverter as aif
 
 
 string = "CC(=O)OC(=O)C" 
-string = "CC(C)(C)C(C)C"
+string = "C1=C2C(=CC(=C1Cl)Cl)OC3=CC(=C(C=C3O2)Cl)Cl"
+# string = 'C1=CC=C2C=CC=CC2=C1'
 # new_format = [["Atom",["Hyb","Rin","Amound"]]]
 new_format = [["Atom",["Hyb","Rin","H:Num"]]]
 add_hydrogen = False
+
+items_to_check = ["C","N","O","I","=","#","(",")"]
+atoms_to_check_f = [atom for atom in items_to_check if atom not in [")","=","#"]]
+atoms_to_check_b = [atom for atom in items_to_check if atom not in ["=","#"]]
+
+
 for index, atom in enumerate(string):
     parameters = []
-    if atom in ["C","N","O","c"]:
+    if atom in ["C","N","O","c", "B"]:
+
           rings = []
           index_f = index+1
           index_b = index-1
@@ -28,7 +36,7 @@ for index, atom in enumerate(string):
               index_b = aif.check_if_ring_b(index_b, string)
         
 
-          if atom in ["C"]:
+          if atom in ["C"] and (not (index_f < len(string) and string[index_f].islower()) or index_f == len(string)):
               #assumes 4 hydrogens
               H_atoms = 4
               #assumes sp3 hybridization
@@ -50,77 +58,95 @@ for index, atom in enumerate(string):
               
               #check for bonds in rings for hybridization
               if index_f < len(string) and string[index_f] in ["="]:
-                  bond_level+=1
-                  if string[index_f+1].isnumeric():
-                      i, rings = aif.check_if_ring_f(index_f+1, string, rings)
+                   bond_level+=1
+                   if string[index_f+1].isnumeric():
+                       i, rings = aif.check_if_ring_f(index_f+1, string, rings)
                     
                  
-              if index_b >= 0 and string[index_b]=="=":
-                  bond_level+=1
-                 
-              # check for bonds for hybridization
-              if index_f < len(string) and string[index_f]=="#":
-                  bond_level+=2
-                 
-              if index_b >= 0 and string[index_b]=="#":
-                  bond_level+=2
-                  
-                  
-              # if index_f < len(string) and string[index_f]=="(":
-              #     if index_f+1 < len(string) and string[index_f+1]=="=":
-              #         bond_level+=1
-              #     if index_f+1 < len(string) and string[index_f+1]=="#":
-              #         bond_level+=2
-                 
+              H_atoms, bond_level = aif.check_atoms_b(index_b, string, items_to_check, atoms_to_check_b, H_atoms, bond_level)
+             
+              H_atoms, bond_level = aif.check_atoms_f(index_f, string, items_to_check, atoms_to_check_f, H_atoms, bond_level)
               
-             #check for atoms and bonds after atoms in order to calculate hydrogens
-              if index_f < len(string) and string[index_f] in ["C","N","O","=","#","(",")"]:
+              if len(rings) == 0:
+                  rings = [0]
                   
-                  if string[index_f] in ["C","N","O","("]:
-                    H_atoms-=1
-                  if string[index_f] in ["="]:
-                    H_atoms-=2
-                  if string[index_f] in ["#"]:
-                    H_atoms-=3
-                  
-                    
-                    
-              # check for atoms befere atom in order to calculate hydrogens
-              if index_b >= 0 and string[index_b] in ["C","N","O","=","#","(",")"]:
-                  if string[index_b] in ["C","N","O","(",")"]:
-                    H_atoms-=1
-                  if string[index_b] in ["="]:
-                    H_atoms-=2
-                  if string[index_b] in ["#"]:
-                    H_atoms-=3
 
+              new_format.append([atom,f"H:{H_atoms}", rings])
+              
           if atom  in ["O", "S"]:
              
              H_atoms = 2
              bond_level = 0
              H_atoms-=len(rings)
 
-             if index_b >= 0 and string[index_b] in ["C","N","O", "(", ")","="]:
-                 if string[index_b] in ["H","C","N","O", "(", ")"]:
-                     H_atoms-=1
-                     
-                 if string[index_b] in ["="]:
-                     H_atoms-=2
-                     bond_level+=1
-                     
-                     
-             if index_f < len(string) and string[index_f] in ["H","C","N","O"]:
-
-                 H_atoms-=1
-                 
+             H_atoms, bond_level = aif.check_atoms_b(index_b, string, items_to_check, atoms_to_check_b, H_atoms, bond_level)
+ 
+             H_atoms, bond_level = aif.check_atoms_f(index_f, string, items_to_check, atoms_to_check_f, H_atoms, bond_level)
              
-        
-
-          #add 0 if no rings for consistancy
-          if len(rings) == 0:
-             rings = [0]
-        
+             if len(rings) == 0:
+                  rings = [0]
+             new_format.append([atom,f"H:{H_atoms}"])
              
+          if atom in ["N","P"]:
+             H_atoms = 3
+             bond_level = 0
+             H_atoms-=len(rings)
+
+             H_atoms, bond_level = aif.check_atoms_b(index_b, string, items_to_check, atoms_to_check_b, H_atoms, bond_level)
+ 
+             H_atoms, bond_level = aif.check_atoms_f(index_f, string, items_to_check, atoms_to_check_f, H_atoms, bond_level)
+
+
+             if len(rings) == 0:
+                  rings = [0]
+             new_format.append([atom,f"H:{H_atoms}"])
+          if atom in ["I"]:
+             H_atoms = 1
+             bond_level = 0
+             H_atoms-=len(rings)
+
+             H_atoms, bond_level = aif.check_atoms_b(index_b, string, items_to_check, atoms_to_check_b, H_atoms, bond_level)
+ 
+             H_atoms, bond_level = aif.check_atoms_f(index_f, string, items_to_check, atoms_to_check_f, H_atoms, bond_level)
+
+
+             if len(rings) == 0:
+                  rings = [0]
+             new_format.append([atom,f"H:{H_atoms}"])            
+
+         
+
+          if atom in ["C"] and ((index_f < len(string) and string[index_f] in ["l"])):
+             H_atoms = 1
+             bond_level = 0
+             H_atoms-=len(rings)
+
+             H_atoms, bond_level = aif.check_atoms_b(index_b, string, items_to_check, atoms_to_check_b, H_atoms, bond_level)
+ 
+             H_atoms, bond_level = aif.check_atoms_f(index_f, string, items_to_check, atoms_to_check_f, H_atoms, bond_level)
+
+             if len(rings) == 0:
+                  rings = [0]
+             new_format.append([atom + string[index_f],f"H:{H_atoms}"])
+             
+
+
+            
+          if atom in ["B"] and ((index_f < len(string) and string[index_f] in ["r"])):
+             H_atoms = 1
+             bond_level = 0
+             H_atoms-=len(rings)
+
+             H_atoms, bond_level = aif.check_atoms_b(index_b, string, items_to_check, atoms_to_check_b, H_atoms, bond_level)
+ 
+             H_atoms, bond_level = aif.check_atoms_f(index_f, string, items_to_check, atoms_to_check_f, H_atoms, bond_level)
+
+             if len(rings) == 0:
+                  rings = [0]
+             new_format.append([atom + string[index_f],f"H:{H_atoms}"])
+            
+             
+            
            #create array of parameters    
           # parameters.append(bond_level+1)
           # parameters.append(rings)
@@ -130,16 +156,13 @@ for index, atom in enumerate(string):
           if H_atoms != 0 and add_hydrogen == True:   
               new_format.append(["H",[1,[0],H_atoms]])
               
-          new_format.append([atom,f"H:{H_atoms}"])
+          
             
-          if atom in ["N","P"]:
-             pass
-         
-            
+
         
              
              
 for data in new_format:
-    print(data)
+    print(index[data], data)
                  
              

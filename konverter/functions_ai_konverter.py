@@ -45,6 +45,10 @@ def check_parantices_f(structure):
             if atom == ")" and structure[index+1] != "(":
                 break
             
+            if atom == "=" and structure[index+1] != "(":
+                break
+            
+            
             
 
             # if atom == ")" and count == 0:
@@ -82,5 +86,28 @@ def check_parantices_b(structure):
         return num_of_branches, lv_of_branches
 
 
+def check_atoms_b(index_b, string, items_to_check, atoms_to_check_b, H_atoms, bond_level):
+    if index_b >= 0 and string[index_b] in items_to_check:
+                  if string[index_b] in atoms_to_check_b:
+                    H_atoms-=1
+                  if string[index_b] in ["="]:
+                    H_atoms-=2
+                    bond_level+=1
+                  if string[index_b] in ["#"]:
+                    H_atoms-=3
+                    bond_level+=1
 
+    return H_atoms, bond_level
 
+def check_atoms_f(index_f, string, items_to_check, atoms_to_check_f, H_atoms, bond_level):
+    if index_f < len(string) and string[index_f] in items_to_check:
+                  if string[index_f] in atoms_to_check_f:
+                    H_atoms-=1
+                  if string[index_f] in ["="]:
+                    H_atoms-=2
+                    bond_level+=1
+                  if string[index_f] in ["#"]:
+                    H_atoms-=3
+                    bond_level+=1
+
+    return H_atoms, bond_level
